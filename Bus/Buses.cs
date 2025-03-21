@@ -1,75 +1,85 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Bus
 {
-    public abstract class Buses
+    public abstract class Bus
     {
-        public int ruta { get; }
-        public int precio { get; }
-        
+        public string Tipo { get; }
+        public int Ruta { get; }
+        public double PrecioBase { get; }
+        public int AsientosTotales { get; }
+        public int Pasajeros { get; protected set; }
 
-        public int asientos { get;}
-
-
-        protected Buses(int Ruta, int Precio, int Asientos)
+        protected Bus(string tipo, int ruta, double precioBase, int asientosTotales)
         {
-
-            ruta = Ruta;
-            precio = Precio;
-            
-            asientos = Asientos;
+            Tipo = tipo;
+            Ruta = ruta;
+            PrecioBase = precioBase;
+            AsientosTotales = asientosTotales;
+            Pasajeros = 0;
         }
 
-        public abstract double CalcularPrecio();
-        public abstract int CalcularAsientos();
+        public abstract void AgregarPasajeros(int cantidad);
+        public abstract double CalcularVentas();
+        public int AsientosDisponibles => AsientosTotales - Pasajeros;
 
         public override string ToString()
         {
-            return $"";
+            return $"{Tipo} {Pasajeros} Pasajeros Ventas {CalcularVentas():N0} quedan {AsientosDisponibles} asientos disponibles";
         }
-
-
-        
-
-
-
     }
-    public class Autobus : Buses
+
+    public class BusPlatinum : Bus
     {
-        public int pasajeros { get; }
-        public Autobus(string rutas, int precio, int distancia, int pasajeros, int asientos) : base(rutas,distancia,precio,pasajeros,asientos) 
-        {
-        }
-        public override double CalcularPrecio()
-        {
-            return precio * ruta;
-        }
-        public override int CalcularAsientos()
-        {
+        public BusPlatinum(int ruta) : base("Auto Bus Plantinum", ruta, 1000, 22) { }
 
-            return asientos-pasajeros;
-
+        public override void AgregarPasajeros(int cantidad)
+        {
+            if (cantidad <= AsientosDisponibles)
+                Pasajeros += cantidad;
         }
 
-
-
-
+        public override double CalcularVentas()
+        {
+            return Pasajeros * PrecioBase * 1.2; // 20% de recargo
+        }
     }
 
-    public class Tipos : Buses
+    public class BusGold : Bus
     {
-        private static readonly double[] preciosPorTipos = { 50,100,150 };
-        private readonly int tipo;
+        public BusGold(int ruta) : base("Auto Bus Gold", ruta, 1000, 15) { }
 
-        public override double CalcularPrecio()
+        public override void AgregarPasajeros(int cantidad)
         {
-            return preciosPorTipos[tipo-1] * ruta;
+            if (cantidad <= AsientosDisponibles)
+                Pasajeros += cantidad;
         }
 
-
+        public override double CalcularVentas()
+        {
+            return Pasajeros * PrecioBase * 1.1; // 10% de recargo
+        }
     }
+
+    public class CentralBuses
+    {
+        private readonly List<Bus> _buses = new List<Bus>();
+
+        public void AgregarBus(Bus bus)
+        {
+            _buses.Add(bus);
+        }
+
+        public void MostrarReporte()
+        {
+            Console.WriteLine("\n--- Reporte de Buses ---");
+            foreach (var bus in _buses)
+            {
+                Console.WriteLine(bus);
+            }
+        }
+    }
+
+    
 }
